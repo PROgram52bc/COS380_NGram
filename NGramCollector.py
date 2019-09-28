@@ -69,9 +69,12 @@ class NGramCollector:
         else:
             return {  }
             
-    def getSuggestions(self, given):
+    def getSuggestions(self, given, noProbability=False):
         """ returns a sorted list of tuples, sorted by their probabilities of appearing after 'given', where the first value in the tuple is the token, the second is the probability """
-        return sorted(self.getProbabilities(given).items(), key=lambda kv:kv[1], reverse=True)
+        suggestions = sorted(self.getProbabilities(given).items(), key=lambda kv:kv[1], reverse=True)
+        if noProbability:
+            suggestions = [ wp[0] for wp in suggestions ]
+        return suggestions
     
     def randomWord(self, given):
         """ get a random word that follows the 'given', based on the probability """
