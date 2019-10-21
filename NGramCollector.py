@@ -2,7 +2,7 @@ import random
 
 class NGramCollector:
     DELIMITER="&"
-    def __init__(self, n):
+    def __init__(self, n=2):
         """ 'n' is the size of the n-gram """
         if n < 2:
             raise Exception("n cannot be less than 2")
