@@ -80,7 +80,7 @@ class NGramCollector:
         c = self.collection
         given_hash = self._hash(given)
         if given_hash in c:
-            return { k: c[given_hash].getProbability(k) for k in c[given_hash].all() }
+            return { k: c[given_hash].getProbability(k) for k in c[given_hash].getAll() }
         else:
             return {  }
             

@@ -2,11 +2,11 @@ from NGramCollector import NGramCollector
 from utility import tokenize_from_file
 
 def main():
-    with open('data.txt') as f:
+    with open('data1.txt') as f:
         print("Tokenizing...")
         tokens = tokenize_from_file(f)
-        ng2 = NGramCollector(2)
-        ng3 = NGramCollector(3)
+        ng2 = NGramCollector(n=2)
+        ng3 = NGramCollector(n=3)
         print("Training...")
         ng2.train(tokens)
         ng3.train(tokens)
