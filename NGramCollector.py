@@ -1,15 +1,16 @@
 import random
+from SortedCounter import SortedCounterDictionary
 
 class NGramCollector:
     DELIMITER="&"
-    def __init__(self, n=2):
+    def __init__(self, subcollectorclass=SortedCounterDictionary, n=2):
         """ 'n' is the size of the n-gram """
         if n < 2:
             raise Exception("n cannot be less than 2")
         self.N = n
         self.collection = {  }
         self.collectionCount = 0
-        pass
+        self.Subcollector = subcollectorclass
 
     def _hash(self, multi_token):
         """ multi_token should be a string (n=2) or an iterable of strings (n>2)
@@ -31,15 +32,19 @@ class NGramCollector:
             next_token = data[i+self.N-1] # the next token
             # print("{:d}: {}".format(i, current_token))
             if current_token in c: # if the 'given' already exists
-                c[current_token]['count'] += 1 # increment its count
-                if next_token in c[current_token]['children']: # if the 'follower' exists
-                    c[current_token]['children'][next_token] += 1 # increment its count as well
-                else: # if 'follower' does not exist
-                    c[current_token]['children'][next_token] = 1 # set it to 1
+                c[current_token].add(next_token)
+                # Using subcollector instead
+                # c[current_token]['count'] += 1 # increment its count
+                # if next_token in c[current_token]['children']: # if the 'follower' exists
+                #     c[current_token]['children'][next_token] += 1 # increment its count as well
+                # else: # if 'follower' does not exist
+                #     c[current_token]['children'][next_token] = 1 # set it to 1
             else: # if the 'given' does not exist, create both the count for itself and its children
-                c[current_token] = {'count': 1, 'children': {
-                    next_token: 1
-                }}
+                c[current_token] = self.Subcollector()
+                c[current_token].add(next_token)
+                # c[current_token] = {'count': 1, 'children': {
+                #     next_token: 1
+                # }}
             self.collectionCount += 1
 
     def getRawProbability(self, given):
@@ -47,7 +52,7 @@ class NGramCollector:
         token should be an iterable of length n-1, or a string, if n=2 """
         c = self.collection
         given_hash = self._hash(given)
-        return c[given_hash]['count']/self.collectionCount if given_hash in c else 0.0
+        return c[given_hash].getTotalCount()/self.collectionCount if given_hash in c else 0.0
 
     def getProbability(self, follower, given):
         """ 'follower' is the token that should follow 'given' 
@@ -55,17 +60,27 @@ class NGramCollector:
         returns a number between 0 and 1 as the probability of 'follower' following 'given' """
         c = self.collection
         given_hash = self._hash(given)
-        if given_hash in c and follower in c[given_hash]['children']:
-            return c[given_hash]['children'][follower]/c[given_hash]['count']
+        if given_hash in c and follower in c[given_hash]:
+            return c[given_hash].getProbability(follower)
         else:
             return 0.0
+
+    def getMostLikely(self, given):
+        """ returns the most likely token to follow 'given'.
+        This method has a better performance for certain subcollectorclass (e.g. SortedCounterLinkedList) """
+        c = self.collection
+        given_hash = self._hash(given)
+        if given_hash in c:
+            return c[given_hash].getMax()
+        else:
+            return None
 
     def getProbabilities(self, given):
         """ returns a dict, where all possible words that follows 'given' are keys, and their probabilities are the values """
         c = self.collection
         given_hash = self._hash(given)
         if given_hash in c:
-            return { k: c[given_hash]['children'][k]/c[given_hash]['count'] for k in c[given_hash]['children'] }
+            return { k: c[given_hash].getProbability(k) for k in c[given_hash].all() }
         else:
             return {  }
             
