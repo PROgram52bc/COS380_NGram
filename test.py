@@ -1,10 +1,10 @@
 from NGramCollector import NGramCollector
-from SortedCounter import SortedCounterDictionary, SortedCounterLinkedList
+from SortedCounter import SortedCounterDictionary, SortedCounterLinkedList, SortedCounterHeap
 from utility import tokenize_from_file_name
 import time
 import random
 TEXT_FILES = ['data1.txt', 'data2.txt', 'data3.txt', 'data4.txt']
-SUBCOLLECTORS = [SortedCounterLinkedList, SortedCounterDictionary]
+SUBCOLLECTORS = [SortedCounterLinkedList, SortedCounterDictionary, SortedCounterHeap]
 # IMPLEMENTATIONS = [NGramCollector]
 
 for name in TEXT_FILES:
